@@ -23,12 +23,31 @@ export async function GET(request: Request) {
     }
     const data = await res.json();
 
-    const messages = (data.list || []).map((m: any) => ({
-      id: m.mail_id,
-      from: m.mail_from,
-      subject: m.mail_subject,
-      date: m.mail_timestamp ? new Date(m.mail_timestamp * 1000).toISOString() : m.mail_date,
-    }));
+    const messages = (data.list || []).map((m: any) => {
+      let isoDate = new Date().toISOString();
+      if (m.mail_timestamp && Number(m.mail_timestamp) > 0) {
+        isoDate = new Date(Number(m.mail_timestamp) * 1000).toISOString();
+      } else if (m.mail_date) {
+        const parsed = new Date(m.mail_date);
+        if (!isNaN(parsed.getTime())) {
+          isoDate = parsed.toISOString();
+        } else {
+          // If it's a time string (e.g., "09:44:33"), merge with today's date
+          const today = new Date().toISOString().split('T')[0];
+          const combined = new Date(`${today}T${m.mail_date}Z`);
+          if (!isNaN(combined.getTime())) {
+            isoDate = combined.toISOString();
+          }
+        }
+      }
+
+      return {
+        id: String(m.mail_id),
+        from: m.mail_from || 'Unknown Sender',
+        subject: m.mail_subject || '(No Subject)',
+        date: isoDate,
+      };
+    });
 
     return NextResponse.json({ messages });
   } catch (error: any) {

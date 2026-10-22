@@ -1,10 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Copy, RefreshCw, Trash2, QrCode, Mail, ChevronLeft, Inbox, Shield, Clock, Smartphone, Edit2, Phone, X } from 'lucide-react';
+import { 
+  Copy, RefreshCw, Trash2, QrCode, Mail, ChevronLeft, Inbox, Shield, 
+  Clock, Smartphone, Edit2, Phone, X, ChevronDown, Zap, Lock, Globe, 
+  Check, Sparkles, Radio, ShieldCheck, Flame, ArrowRight, Bell, Terminal, Eye
+} from 'lucide-react';
 
 interface Message {
-  id: number;
+  id: string | number;
   from: string;
   subject: string;
   date: string;
@@ -14,14 +18,6 @@ interface MessageDetail extends Message {
   textBody: string;
   htmlBody: string;
   attachments: any[];
-}
-
-interface Article {
-  id: number;
-  title: string;
-  description: string;
-  url: string;
-  social_image: string;
 }
 
 export default function Home() {
@@ -35,7 +31,8 @@ export default function Home() {
   const [showQR, setShowQR] = useState(false);
   const [activeTab, setActiveTab] = useState<'email' | 'phone'>('email');
   const [phone, setPhone] = useState<string | null>(null);
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const toastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -109,21 +106,6 @@ export default function Home() {
     generatePhone();
   }, []);
 
-  useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        const res = await fetch('https://dev.to/api/articles?tag=privacy&per_page=6');
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          setArticles(data);
-        }
-      } catch (err) {
-        console.error('Failed to fetch articles:', err);
-      }
-    };
-    fetchArticles();
-  }, []);
-
   const fetchMessages = useCallback(async (isAuto = false) => {
     if (!token) return;
     if (!isAuto) setLoadingMessages(true);
@@ -148,7 +130,7 @@ export default function Home() {
     }
   }, [token, fetchMessages]);
 
-  const readMessage = async (id: number) => {
+  const readMessage = async (id: string | number) => {
     if (!token) return;
     setViewMessage(null);
     setLoadingMessages(true);
@@ -169,13 +151,50 @@ export default function Home() {
     const textToCopy = activeTab === 'email' ? email : phone;
     if (textToCopy) {
       navigator.clipboard.writeText(textToCopy);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2200);
       showToast(`${activeTab === 'email' ? 'Email address' : 'Phone number'} copied to clipboard`);
     }
   };
 
+  const formatTime = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr || '';
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return dateStr || '';
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr || '';
+      return d.toLocaleString();
+    } catch {
+      return dateStr || '';
+    }
+  };
+
+  const scrollToHero = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    <main className="container">
-      {toast && <div className="toast">{toast}</div>}
+    <main className="container main-content">
+      {/* Ambient Aurora Glow Spheres */}
+      <div className="aurora-orb aurora-orb-1" aria-hidden="true" />
+      <div className="aurora-orb aurora-orb-2" aria-hidden="true" />
+      <div className="aurora-orb aurora-orb-3" aria-hidden="true" />
+
+      {toast && (
+        <div className="toast">
+          <div className="toast-glow" />
+          <Check size={18} className="toast-icon" />
+          <span>{toast}</span>
+        </div>
+      )}
 
       {showQR && (
         <div className="qr-modal" onClick={() => setShowQR(false)}>
@@ -183,119 +202,243 @@ export default function Home() {
             <button className="qr-close" onClick={() => setShowQR(false)} aria-label="Close">
               <X size={18} />
             </button>
+            <div className="qr-badge">
+              <QrCode size={14} /> INSTANT HANDOFF
+            </div>
             <h3>Scan QR Code</h3>
-            {email && <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=mailto:${email}`} alt="QR Code" />}
+            <p className="qr-desc">Scan from your mobile device to open this temporary mailbox instantly.</p>
+            {email && (
+              <div className="qr-image-wrapper">
+                <img 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=mailto:${email}`} 
+                  alt="QR Code" 
+                />
+              </div>
+            )}
+            <div className="qr-address-preview">{email}</div>
           </div>
         </div>
       )}
 
-      {/* Hero Section */}
+      {/* ── Hero Section ── */}
       <section className="hero">
+
+        <h1 className="hero-title">
+          {activeTab === 'email' ? (
+            <>
+              Next-Gen Disposable Email for the <span className="aurora-gradient-text">Autonomous Web</span>
+            </>
+          ) : (
+            <>
+              Synthetic Phone Identities for <span className="aurora-gradient-text">Instant Mocking</span>
+            </>
+          )}
+        </h1>
+
+
         <div className="tabs">
-          <button className={`tab-btn ${activeTab === 'email' ? 'active' : ''}`} onClick={() => setActiveTab('email')}>
-            <Mail size={20} /> Temporary Email
+          <button 
+            className={`tab-btn ${activeTab === 'email' ? 'active' : ''}`} 
+            onClick={() => setActiveTab('email')}
+          >
+            <Mail size={18} /> 
+            <span>Temporary Email</span>
+            {activeTab === 'email' && <span className="tab-indicator" />}
           </button>
-          <button className={`tab-btn ${activeTab === 'phone' ? 'active' : ''}`} onClick={() => setActiveTab('phone')}>
-            <Phone size={20} /> Fake Phone Number
+          <button 
+            className={`tab-btn ${activeTab === 'phone' ? 'active' : ''}`} 
+            onClick={() => setActiveTab('phone')}
+          >
+            <Phone size={18} /> 
+            <span>Fake Phone Number</span>
+            {activeTab === 'phone' && <span className="tab-indicator" />}
           </button>
         </div>
-
-        <h1>{activeTab === 'email' ? 'Your Temporary Email Address' : 'Your Fake Phone Number'}</h1>
-        <p>{activeTab === 'email' ? 'Forget about spam, advertising mailings, hacking and attacking robots. Keep your real mailbox clean and secure.' : 'Generate a random, fake phone number for testing or placeholders.'}</p>
         
+        {/* Futuristic Command Console */}
         <div className="email-box">
+
           {loadingEmail && (
             <div className="loading-overlay">
-              <RefreshCw className="animate-spin" size={32} color="#10b981" />
+              <div className="loading-spinner-wrap">
+                <RefreshCw className="animate-spin" size={36} color="#06b6d4" />
+                <span className="loading-text">Synthesizing Fresh Mail Node...</span>
+              </div>
             </div>
           )}
           
           <div className="email-input-wrapper">
+            <div className="input-prefix-icon">
+              {activeTab === 'email' ? <Mail size={20} /> : <Phone size={20} />}
+            </div>
             <input 
               type="text" 
               className="email-input" 
-              value={activeTab === 'email' ? (email || (loadingEmail ? 'Loading...' : 'Failed to generate email')) : (phone || 'Generating...')}
+              value={activeTab === 'email' ? (email || (loadingEmail ? 'Generating secure address...' : 'Failed to generate email')) : (phone || 'Generating...')}
               readOnly 
+              aria-label={activeTab === 'email' ? 'Temporary email address' : 'Fake phone number'}
             />
             {activeTab === 'email' && (
-              <button className="qr-btn" onClick={() => setShowQR(true)} title="QR Code" disabled={!email}>
-                <QrCode size={24} />
+              <button 
+                className="qr-btn" 
+                onClick={() => setShowQR(true)} 
+                title="Scan QR Code" 
+                disabled={!email}
+                aria-label="Scan QR Code"
+              >
+                <QrCode size={20} />
               </button>
             )}
           </div>
           
           <div className="email-actions">
-            <button className="action-btn" onClick={copyToClipboard}>
-              <Copy size={20} /> Copy
+            <button 
+              className={`action-btn btn-copy ${copied ? 'btn-copied' : ''}`} 
+              onClick={copyToClipboard}
+              title="Copy to clipboard"
+            >
+              {copied ? <Check size={18} /> : <Copy size={18} />}
+              <span>{copied ? 'Copied to Clipboard!' : 'Copy Address'}</span>
             </button>
+
             {activeTab === 'email' && (
-              <button className="action-btn" onClick={() => fetchMessages(false)}>
-                <RefreshCw size={20} className={loadingMessages ? 'animate-spin' : ''} /> Refresh
+              <button 
+                className="action-btn btn-refresh" 
+                onClick={() => fetchMessages(false)}
+                title="Refresh inbox"
+              >
+                <RefreshCw size={18} className={loadingMessages ? 'animate-spin' : ''} />
+                <span>Refresh Inbox</span>
               </button>
             )}
-            <button className="action-btn" onClick={activeTab === 'email' ? generateEmail : generatePhone}>
-              <Edit2 size={20} /> Change
+
+            <button 
+              className="action-btn btn-change" 
+              onClick={activeTab === 'email' ? generateEmail : generatePhone}
+              title="Generate a new address"
+            >
+              <Edit2 size={18} />
+              <span>Change Address</span>
             </button>
-            <button className="action-btn danger" onClick={activeTab === 'email' ? generateEmail : generatePhone}>
-              <Trash2 size={20} /> Delete
+
+            <button 
+              className="action-btn btn-delete danger" 
+              onClick={activeTab === 'email' ? generateEmail : generatePhone}
+              title="Delete and burn current inbox"
+            >
+              <Trash2 size={18} />
+              <span>Delete &amp; Burn</span>
             </button>
           </div>
         </div>
+
       </section>
 
-      {/* Inbox Section */}
+      {/* ── Inbox Section (Command Center) ── */}
       {activeTab === 'email' ? (
         <section className="inbox-section">
           {viewMessage ? (
             <div className="message-view animate-fade-in">
               <div className="message-view-header">
                 <button className="back-btn" onClick={() => setViewMessage(null)}>
-                  <ChevronLeft size={20} /> Back to list
+                  <ChevronLeft size={18} /> Back to list
                 </button>
                 <h2 className="message-view-title">{viewMessage.subject || '(No Subject)'}</h2>
                 <div className="message-meta">
                   <span><strong>From:</strong> {viewMessage.from}</span>
-                  <span>{new Date(viewMessage.date).toLocaleString()}</span>
+                  <span>{formatDate(viewMessage.date)}</span>
                 </div>
               </div>
               <div className="message-body">
                 {viewMessage.htmlBody ? (
-                  <iframe srcDoc={viewMessage.htmlBody} title="Message Body" />
+                  <iframe 
+                    srcDoc={viewMessage.htmlBody} 
+                    title="Message Body" 
+                    sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin"
+                  />
                 ) : (
-                  <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>{viewMessage.textBody}</pre>
+                  <pre className="message-text-preview">{viewMessage.textBody}</pre>
                 )}
               </div>
             </div>
           ) : (
             <div className="message-list-container">
               <div className="inbox-header">
-                <h2><Inbox size={20} /> Inbox</h2>
+                <div className="inbox-header-left">
+                  <div className="inbox-header-icon-wrap">
+                    <Inbox size={20} />
+                  </div>
+                  <h2>Inbox</h2>
+                </div>
+                
                 <div className="inbox-status">
-                  <div className="status-dot"></div>
-                  Waiting for incoming emails
+                  <div className="radar-ping-wrap">
+                    <span className="radar-wave"></span>
+                    <span className="radar-wave wave-2"></span>
+                    <div className="status-dot"></div>
+                  </div>
+                  <span className="status-text">
+                    {loadingMessages ? 'Polling mail server...' : 'Waiting for incoming emails'}
+                  </span>
                 </div>
               </div>
               
               {loadingMessages && !messages.length ? (
                 <div className="inbox-empty">
-                  <RefreshCw className="animate-spin" size={32} />
-                  <p>Loading messages...</p>
+                  <div className="radar-scanner-box">
+                    <div className="radar-circle circle-1"></div>
+                    <div className="radar-circle circle-2"></div>
+                    <div className="radar-circle circle-3"></div>
+                    <div className="radar-sweep"></div>
+                    <RefreshCw className="animate-spin radar-center-icon" size={28} />
+                  </div>
+                  <h3>Establishing Mail Stream...</h3>
+                  <p>Connecting to IMAP nodes. Incoming verification codes will appear here automatically.</p>
                 </div>
               ) : messages.length === 0 ? (
                 <div className="inbox-empty animate-fade-in">
-                  <Mail />
-                  <h3>Your inbox is empty</h3>
-                  <p>Waiting for incoming emails...</p>
+                  <div className="radar-scanner-box">
+                    <div className="radar-circle circle-1"></div>
+                    <div className="radar-circle circle-2"></div>
+                    <div className="radar-circle circle-3"></div>
+                    <div className="radar-sweep"></div>
+                    <Mail className="radar-center-icon" size={28} />
+                  </div>
+                  <h3>Your Inbox Stream is Clean &amp; Waiting</h3>
+                  <p>Send an email to your temporary address above. Messages, verification OTPs, and links will pop in automatically with zero page reload required.</p>
                 </div>
               ) : (
                 <div className="message-list">
-                  {messages.map((msg) => (
-                    <div key={msg.id} className="message-item animate-fade-in" onClick={() => readMessage(msg.id)}>
-                      <div className="msg-sender">{msg.from}</div>
-                      <div className="msg-subject">{msg.subject || '(No Subject)'}</div>
-                      <div className="msg-time">{new Date(msg.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-                    </div>
-                  ))}
+                  {messages.map((msg) => {
+                    const initials = (msg.from || 'U')
+                      .replace(/<.*?>/, '')
+                      .trim()
+                      .slice(0, 2)
+                      .toUpperCase();
+                    return (
+                      <div 
+                        key={msg.id} 
+                        className="message-item animate-fade-in" 
+                        onClick={() => readMessage(msg.id)}
+                      >
+                        <div className="msg-avatar" aria-hidden="true">
+                          {initials}
+                        </div>
+                        <div className="msg-content-col">
+                          <div className="msg-sender-row">
+                            <span className="msg-sender">{msg.from}</span>
+                          </div>
+                          <div className="msg-subject">{msg.subject || '(No Subject)'}</div>
+                        </div>
+                        <div className="msg-time-col">
+                          <span className="msg-time-pill">
+                            {formatTime(msg.date)}
+                          </span>
+                          <ArrowRight size={16} className="msg-arrow" />
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -304,96 +447,285 @@ export default function Home() {
       ) : (
         <section className="inbox-section">
           <div className="inbox-empty animate-fade-in" style={{ padding: '6rem 2rem' }}>
-            <Phone size={64} style={{ opacity: 0.2 }} />
-            <h3>Fake Number Only</h3>
-            <p style={{ maxWidth: '400px' }}>This feature generates a random formatting-compliant phone number for placeholder or testing purposes. It cannot send or receive SMS messages.</p>
+            <div className="radar-scanner-box">
+              <div className="radar-circle circle-1"></div>
+              <div className="radar-circle circle-2"></div>
+              <div className="radar-sweep"></div>
+              <Phone className="radar-center-icon" size={32} />
+            </div>
+            <h3>Synthetic Mock Number Only</h3>
+            <p style={{ maxWidth: '440px' }}>
+              This module generates synthetically formatted E.164-compliant numbers designed exclusively for QA forms, wireframes, and layout mocking. It does not interface with telecom carriers or receive inbound SMS.
+            </p>
           </div>
         </section>
       )}
 
-      {/* Features Section */}
-      <section id="features" className="info-section">
-        <h2>Why use a temporary email?</h2>
-        <p>TempMail provides a free, secure, and disposable email address to help you protect your online privacy.</p>
-        
-        <div className="info-grid">
-          <div className="info-card">
-            <div className="info-icon"><Shield size={24} /></div>
-            <h3>Protect your privacy</h3>
-            <p>Avoid revealing your real email address. Protect yourself from spam, phishing, and unwanted promotional emails by using a disposable address.</p>
-          </div>
-          <div className="info-card">
-            <div className="info-icon"><Clock size={24} /></div>
-            <h3>Instant setup</h3>
-            <p>No registration required. Your temporary email address is generated instantly and ready to receive emails from any sender immediately.</p>
-          </div>
-          <div className="info-card">
-            <div className="info-icon"><Smartphone size={24} /></div>
-            <h3>Mobile friendly</h3>
-            <p>Our responsive design ensures that you can check your temporary inbox from any device, whether you're on a desktop, tablet, or smartphone.</p>
-          </div>
+      {/* ── Features Section ── */}
+      <section id="features" className="features-section">
+        <div className="section-badge">
+          <Shield size={14} /> ARCHITECTURAL PRIVACY
+        </div>
+        <h2 className="section-heading">
+          Why <span className="aurora-gradient-text">FakeEmail</span> is your ultimate digital cloaking tool
+        </h2>
+        <p className="section-sub">
+          Engineered from first principles for zero tracking, instant ephemeral existence, and resilient data hygiene.
+        </p>
+
+        <div className="features-grid">
+          {([
+            { 
+              theme: 'theme-emerald', 
+              icon: <Lock size={22} />, 
+              title: 'Zero-Trace Architecture', 
+              desc: "We don't collect names, IP logs, device fingerprints, or real emails. Every address exists in strict cryptographic isolation — your identity stays completely yours." 
+            },
+            { 
+              theme: 'theme-cyan', 
+              icon: <Zap size={22} />, 
+              title: 'Sub-Second Activation', 
+              desc: 'No registration forms, no phone numbers, no captcha delays. Open FakeEmail and your disposable inbox is already live — copy and deploy anywhere online immediately.' 
+            },
+            { 
+              theme: 'theme-purple', 
+              icon: <Smartphone size={22} />, 
+              title: 'Universal Device Adaptation', 
+              desc: "Whether on your phone during a commute or on high-resolution multi-monitor desktop setups, FakeEmail's cyber glass layout adapts fluidly with crisp accessibility." 
+            },
+            { 
+              theme: 'theme-pink', 
+              icon: <Mail size={22} />, 
+              title: 'Rich HTML & Inline OTP Rendering', 
+              desc: 'Unlike basic text scrapers, our engine receives and renders rich HTML emails with clickable links, OTPs, verification cards, and interactive confirmation banners.' 
+            },
+            { 
+              theme: 'theme-amber', 
+              icon: <RefreshCw size={22} />, 
+              title: 'Unlimited Fresh Rotations', 
+              desc: "Hit 'Change' and rotate to a brand-new address instantly. There are no quotas or throttle limits — use distinct disposable identities across every service you evaluate." 
+            },
+            { 
+              theme: 'theme-blue', 
+              icon: <QrCode size={22} />, 
+              title: 'Holographic QR Air-Drop', 
+              desc: 'Need to pass your temporary address to your smartphone or a coworker nearby? Scan the built-in QR code on any camera and transfer without typing a single character.' 
+            },
+          ] as { theme: string; icon: React.ReactNode; title: string; desc: string }[]).map((f, i) => (
+            <div key={i} className={`feature-card ${f.theme}`}>
+              <div className="feature-glow-ring" />
+              <div className="feature-icon-wrap">{f.icon}</div>
+              <h3>{f.title}</h3>
+              <p>{f.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Popular Articles Section */}
-      {articles.length > 0 && (
-        <section className="articles-section">
-          <h2>Popular Articles</h2>
-          <div className="articles-grid">
-            {articles.map(article => (
-              <a key={article.id} href={article.url} target="_blank" rel="noopener noreferrer" className="article-card">
-                <div className="article-content">
-                  <h3>{article.title}</h3>
-                  <p>{article.description}</p>
+      {/* ── How It Works Section ── */}
+      <section className="hiw-section">
+        <div className="section-badge">
+          <Globe size={14} /> THREE-PHASE PIPELINE
+        </div>
+        <h2 className="section-heading">
+          How <span className="aurora-gradient-text">FakeEmail</span> operates
+        </h2>
+        <p className="section-sub">
+          A seamless three-step protocol that shields your primary email from spam, phishing, and database leaks.
+        </p>
+
+        <div className="hiw-steps">
+          {([
+            { 
+              n: '01', 
+              theme: 'step-cyan',
+              title: 'Acquire Instant Identity', 
+              desc: "When you land on FakeEmail, a unique disposable email address is synthesized for you immediately. Click 'Copy Address' and you are equipped to navigate the web safely." 
+            },
+            { 
+              n: '02', 
+              theme: 'step-purple',
+              title: 'Deploy Into Any Sign-Up Gate', 
+              desc: 'Paste the address into trial gates, gated downloads, forums, or untrusted services. Inbound verification codes and confirmation links stream directly to your console.' 
+            },
+            { 
+              n: '03', 
+              theme: 'step-pink',
+              title: 'Verify, Extract & Purge', 
+              desc: "Complete your verification in our sandboxed viewer. When finished, hit 'Delete & Burn' — the address is cryptographically severed and future spam routes into the void." 
+            },
+          ] as { n: string; theme: string; title: string; desc: string }[]).flatMap((s, i, arr) => {
+            const step = (
+              <div key={`step-${i}`} className={`hiw-step ${s.theme}`}>
+                <div className="hiw-num-box">
+                  <span className="hiw-num">{s.n}</span>
+                  <div className="hiw-step-tag">PHASE // 0{i + 1}</div>
                 </div>
-                <img src={article.social_image} alt={article.title} className="article-image" />
-              </a>
-            ))}
+                <div className="hiw-body">
+                  <h3>{s.title}</h3>
+                  <p>{s.desc}</p>
+                </div>
+              </div>
+            );
+            return i < arr.length - 1
+              ? [
+                  step, 
+                  <div key={`conn-${i}`} className="hiw-connector" aria-hidden="true">
+                    <div className="laser-beam"></div>
+                  </div>
+                ]
+              : [step];
+          })}
+        </div>
+      </section>
+
+      {/* ── FAQ Section ── */}
+      <section id="faq" className="faq-section">
+        <div className="section-badge">
+          <Mail size={14} /> INTEL &amp; FAQS
+        </div>
+        <h2 className="section-heading">
+          Frequently asked <span className="aurora-gradient-text">questions</span>
+        </h2>
+        <p className="section-sub">
+          Everything you need to know about disposable identities, data retention, and privacy mechanics.
+        </p>
+
+        <div className="faq-list">
+          {([
+            { 
+              q: 'Is FakeEmail completely free to use?', 
+              a: 'Yes — 100% free and uncapped. FakeEmail is built as an open utility without paywalls, credit card requirements, or forced subscriptions. Open the site and use your inbox freely as often as you want.' 
+            },
+            { 
+              q: 'How long does my temporary address remain active?', 
+              a: "Your address remains active and persistent in your local browser storage until you choose to click 'Delete & Burn' or clear your browser data. There is no arbitrary countdown timer cutting you off halfway through an account confirmation." 
+            },
+            { 
+              q: 'Can I receive all email formats, HTML, and verification links?', 
+              a: 'Yes. FakeEmail connects directly to actual email servers and renders incoming messages with HTML markup, images, formatted text, and clickable verification buttons so sign-ups work cleanly.' 
+            },
+            { 
+              q: 'Is my temporary inbox visible to other users?', 
+              a: 'No. Every email generated has a distinct random cryptographic alias and authentication token tied exclusively to your session. Others cannot browse or intercept your incoming mail.' 
+            },
+            { 
+              q: 'Can I use FakeEmail to receive SMS text messages or calls?', 
+              a: "The 'Fake Phone Number' utility generates formatting-compliant dummy numbers intended for UI mocking, QA testing, and layout placeholders. It is not connected to a telecom gateway and cannot receive incoming SMS or phone calls." 
+            },
+            { 
+              q: 'Do you log, analyze, or sell personal data or messages?', 
+              a: 'No. FakeEmail maintains zero tracking telemetry, does not sell data to advertisers, and does not retain emails once dismissed. Messages are pulled directly into your client session as an ephemeral pass-through viewer.' 
+            },
+          ]).map((item, i) => (
+            <div
+              key={i}
+              className={`faq-item${openFaq === i ? ' faq-open' : ''}`}
+              onClick={() => setOpenFaq(openFaq === i ? null : i)}
+              role="button"
+              aria-expanded={openFaq === i}
+              tabIndex={0}
+              onKeyDown={e => e.key === 'Enter' && setOpenFaq(openFaq === i ? null : i)}
+            >
+              <div className="faq-q">
+                <span className="faq-question-text">{item.q}</span>
+                <ChevronDown size={18} className="faq-chevron" />
+              </div>
+              <div className="faq-a">
+                <p>{item.a}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Deep Dive Article ── */}
+      <section className="article-section">
+        <div className="article-inner">
+          <div className="section-badge">
+            <ShieldCheck size={14} /> SECURITY DOSSIER
           </div>
-        </section>
-      )}
-      {/* Deep Dive SEO Article Section */}
-      <section className="long-article">
-        <h2>The Technology Behind Disposable Email Addresses</h2>
-        <p>Almost everyone requires an email address on a daily basis—whether it's for networking, corresponding with clients, keeping in touch with friends, or simply navigating the web. Today, nearly 99% of online services, apps, and forums demand an email address for registration, not to mention loyalty programs and promotional contests.</p>
-        <p>While having an email address is essential, the sheer volume of spam that clutters our inboxes is incredibly frustrating. Moreover, data breaches are increasingly common; if an online store's database gets hacked, your primary email could be exposed and added to countless spam lists. Since true privacy is hard to guarantee online, safeguarding your identity is crucial, and the best way to do that is by using a disposable email address.</p>
+          <h2 className="section-heading">
+            The strategic imperative of <span className="aurora-gradient-text">disposable email</span> in 2026
+          </h2>
 
-        <h3>What Exactly Is a Disposable Email Address?</h3>
-        <p>Have you ever noticed an unusual spike in bounce rates when sending out an email campaign? Often, this happens because users (or bots) sign up using temporary email addresses to mask their real identities.</p>
-        <p>A disposable email address (DEA) is a system that allows users to generate a temporary, unique email address for immediate use. DEAs let you create an email that satisfies the validity requirements for signing up on websites and services without exposing your actual personal contact information.</p>
-        <p>If a disposable email address is ever compromised or linked to spam, the owner remains completely insulated. You can simply discard the address without it ever affecting your real inbox or other contacts. A temporary email acts as a throwaway proxy—it receives your messages for a short duration and then self-destructs, ensuring your primary inbox remains clean.</p>
+          <p>
+            Every time you submit your real primary email into an online form, you enter an asymmetrical contract: you hand over a permanent, cross-platform identifier in exchange for a one-time piece of content, software trial, or account gate. In 2026, data aggregation networks map this single identifier across hundreds of independent databases.
+          </p>
+          <p>
+            FakeEmail reverses this vulnerability by decoupling your authentic digital identity from disposable web interactions, turning untrusted services into zero-risk dead ends.
+          </p>
 
-        <h3>Why Would You Need a Fake Email Address?</h3>
-        <p>You’ve likely seen that premium services like Hulu, Netflix, or Amazon Prime offer limited-time free trials. If you wish to continue evaluating the service after your trial ends, a disposable email address can help. By using a newly generated email, you can easily sign up for an extended trial period.</p>
-        <p>Additionally, both online and offline retailers frequently ask for your email address to send you special offers. While the discounts are nice, the resulting flood of promotional spam is not. A temporary email address is the perfect solution to bypass those annoying marketing messages.</p>
-        <p>While some might associate disposable emails with shady internet activities, there are many highly legitimate and practical reasons to use a fake email service:</p>
-        
-        <ul>
-          <li><strong>Store Loyalty Cards:</strong> Avoid promotional emails from retail stores. Use a disposable email when signing up so you never receive spam, and if the store's data is breached, your real email remains safe.</li>
-          <li><strong>App Testing:</strong> If you’re a developer who just finished coding a web application, you can quickly generate 100 disposable emails to create dummy accounts. This allows you to thoroughly test your app without needing to hire unreliable third-party testers.</li>
-          <li><strong>Managing Multiple Accounts:</strong> If you need a second account for a service (like an IFTTT automation for a marketing Twitter account), a disposable email from temp-email.org saves you the hassle of creating and managing a brand new traditional inbox.</li>
-          <li><strong>Spam Elimination:</strong> For users who frequently use web forms, sign up for forums, or participate in discussion groups, a disposable email is an invaluable tool for keeping spam to an absolute minimum.</li>
-        </ul>
+          <div className="article-pullquote">
+            <div className="pullquote-decor"></div>
+            <blockquote>
+              &ldquo;Your primary email address is the single most valuable cross-site tracking anchor you give away for free every single day. Treating it as disposable by default is the highest-leverage privacy decision you can make.&rdquo;
+            </blockquote>
+          </div>
 
-        <h3>How to Choose the Best Disposable Email Provider?</h3>
-        <p>The ideal fake email provider should offer the following:</p>
-        <ul>
-          <li>Generate temporary email addresses instantly with a single click.</li>
-          <li>Require zero registration or personal identity information.</li>
-          <li>Keep the email address completely anonymous.</li>
-          <li>Allow you to generate as many email addresses as you need.</li>
-          <li>Provide a functional, temporary inbox to receive and read your messages.</li>
-          <li>Feature a clean, straightforward design for maximum ease of use.</li>
-          <li>Give users random account names while also allowing custom address choices.</li>
-        </ul>
-        <p>Stay entirely spam-free and save your valuable time with <strong>temp-email.org</strong>, your reliable disposable email service.</p>
+          <h3>The hidden economics of primary email harvesting</h3>
+          <p>
+            Data brokers, lead-generation aggregators, and advertising conglomerates ingest corporate acquisition lists and breach dumps continuously. When a startup you tested years ago pivots, merges, or suffers a security incident, your email address is seldom purged — it enters resale circulation. A single exposed inbox address can trigger dozens of automated drip spam campaigns and phishing exploits.
+          </p>
+          <p>
+            By adopting FakeEmail for transient interactions, that cycle is shattered. If a downstream service leaks their records, the compromised entry leads to an ephemeral, discarded node with zero correlation to your personal or professional communications.
+          </p>
 
-        <h3>How Do You Use a Disposable Email Address?</h3>
-        <p>Some users try to create "disposable" addresses by registering new accounts with traditional providers like Gmail. However, this comes with hurdles: you have to provide a phone number, fill out registration forms, and then actively manage that new inbox.</p>
-        <p>The beauty of a true disposable email address is its simplicity. At temp-email.org, your temporary inbox is ready instantly without any sign-up. You can even use these temporary addresses for quick verification and then forget about them entirely. If you suspect an address has been compromised, simply generate a new one and let the old one vanish.</p>
+          <h3>Key operational use cases</h3>
+          <p>
+            Ephemeral email infrastructure empowers users across engineering, testing, shopping, and everyday browsing:
+          </p>
+          <ul className="article-key-points">
+            <li>
+              <strong>Engineers &amp; QA Specialists</strong> &mdash; Test onboarding journeys, transactional email templates, and automated OTP authentication across dozens of isolated addresses without cluttering internal accounts.
+            </li>
+            <li>
+              <strong>Content &amp; Research Access</strong> &mdash; Access gated industry whitepapers, market reports, and design templates without opting into multi-month corporate sales cadences.
+            </li>
+            <li>
+              <strong>E-Commerce &amp; Coupon Verification</strong> &mdash; Unlock first-time consumer discounts and promo vouchers while completely preventing ongoing retail promotional spam.
+            </li>
+            <li>
+              <strong>Public Wi-Fi &amp; Travel Check-ins</strong> &mdash; Register for airport connectivity, hotel access portals, and event venues without leaving a permanent footprint in hospitality CRM databases.
+            </li>
+          </ul>
 
-        <h3>To Conclude:</h3>
-        <p>Setting up a disposable email address is a fantastic strategy to ensure that your real identity remains hidden when participating in online wikis, chat rooms, file-sharing platforms, and message boards. Never worry about your data being sold to spammers again—protect your inbox with <strong>temp-email.org</strong>.</p>
+          <h3>Core engineering principles of FakeEmail</h3>
+          <p>
+            Many legacy disposable email utilities are throttled by hostile pop-ups, broken HTML parsing, or sluggish polling. FakeEmail was engineered under strict foundational criteria:
+          </p>
+          <ul className="article-key-points">
+            <li>
+              <strong>Zero-friction instantiation</strong> &mdash; Inboxes are provisioned synchronously on page load with zero captcha gates or human verification friction.
+            </li>
+            <li>
+              <strong>Authentic mail server interoperability</strong> &mdash; Inbound emails arrive via production SMTP routes, guaranteeing that verification links, OTP tokens, and rich styles render accurately.
+            </li>
+            <li>
+              <strong>Client-sovereign control</strong> &mdash; Addresses and tokens live in your client browser session, allowing you to cycle or purge identities with a single click.
+            </li>
+          </ul>
+
+          {/* Futuristic Call-To-Action Card */}
+          <div className="article-cta">
+            <div className="article-cta-glow"></div>
+            <div className="article-cta-icon">
+              <Zap size={28} />
+            </div>
+            <div className="article-cta-content">
+              <strong>Your Disposable Inbox is Live Right Now</strong>
+              <p>No software download. No registration. No tracking. Your unique, isolated address is active and waiting at the top of this console.</p>
+            </div>
+            <button className="article-cta-btn" onClick={scrollToHero}>
+              <span>Generate / View Address</span>
+              <ArrowRight size={16} />
+            </button>
+          </div>
+
+          <p className="article-closer">
+            Your personal email belongs to you. <span className="aurora-gradient-text">Keep it that way.</span>
+          </p>
+        </div>
       </section>
     </main>
   );
