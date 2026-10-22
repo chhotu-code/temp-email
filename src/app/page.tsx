@@ -26,6 +26,7 @@ interface Article {
 
 export default function Home() {
   const [email, setEmail] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loadingEmail, setLoadingEmail] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -56,13 +57,15 @@ export default function Home() {
     try {
       const res = await fetch('/api/generate');
       const data = await res.json();
-      if (!res.ok || !data.email) {
+      if (!res.ok || !data.email || !data.token) {
         throw new Error(data.error || 'Failed to generate email');
       }
       retriesLeft.current = 2;
       dismissToast();
       setEmail(data.email);
+      setToken(data.token);
       localStorage.setItem('tempMailAddress', data.email);
+      localStorage.setItem('tempMailToken', data.token);
       setMessages([]);
       setViewMessage(null);
     } catch (err) {
@@ -85,8 +88,10 @@ export default function Home() {
     didInit.current = true;
 
     const savedEmail = localStorage.getItem('tempMailAddress');
-    if (savedEmail) {
+    const savedToken = localStorage.getItem('tempMailToken');
+    if (savedEmail && savedToken) {
       setEmail(savedEmail);
+      setToken(savedToken);
       setLoadingEmail(false);
     } else {
       generateEmail();
@@ -120,10 +125,10 @@ export default function Home() {
   }, []);
 
   const fetchMessages = useCallback(async (isAuto = false) => {
-    if (!email) return;
+    if (!token) return;
     if (!isAuto) setLoadingMessages(true);
     try {
-      const res = await fetch(`/api/messages?email=${email}`);
+      const res = await fetch(`/api/messages?token=${encodeURIComponent(token)}`);
       const data = await res.json();
       if (data.messages) {
         setMessages(data.messages);
@@ -133,21 +138,22 @@ export default function Home() {
     } finally {
       if (!isAuto) setLoadingMessages(false);
     }
-  }, [email]);
+  }, [token]);
 
   useEffect(() => {
-    if (email) {
+    if (token) {
       fetchMessages(true);
       const interval = setInterval(() => fetchMessages(true), 10000);
       return () => clearInterval(interval);
     }
-  }, [email, fetchMessages]);
+  }, [token, fetchMessages]);
 
   const readMessage = async (id: number) => {
+    if (!token) return;
     setViewMessage(null);
     setLoadingMessages(true);
     try {
-      const res = await fetch(`/api/message?email=${email}&id=${id}`);
+      const res = await fetch(`/api/message?token=${encodeURIComponent(token)}&id=${id}`);
       const data = await res.json();
       if (data.message) {
         setViewMessage(data.message);

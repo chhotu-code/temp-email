@@ -4,7 +4,7 @@ A modern, high-performance, and privacy-focused web application that provides us
 
 ## 🌟 Key Features
 
-1. **Disposable Temporary Email (Powered by Mail.tm API):**
+1. **Disposable Temporary Email (Powered by Guerrilla Mail API):**
    - Instantly generates a random email address using active domains.
    - Automatically polls the server every 10 seconds to retrieve incoming emails.
    - Robust viewing of both Plain Text and HTML emails using secure iframes.
@@ -38,13 +38,14 @@ The project operates entirely within the Next.js ecosystem without the need for 
 - **Frontend:** Next.js 14+ (App Router), React 18, HTML5, Vanilla CSS variables (for the custom design system).
 - **Icons:** `lucide-react` for crisp SVG iconography.
 - **Backend (Serverless):** Next.js Route Handlers (`/api/generate`, `/api/messages`, `/api/message`).
-- **External Email API:** [Mail.tm](https://mail.tm/)
+- **External Email API:** [Guerrilla Mail](https://www.guerrillamail.com/)
 - **External Article API:** [Dev.to API](https://developers.forem.com/api)
 - **External QR API:** QRServer API
 
-### Why Mail.tm?
-Originally, the project was tested with `1secmail`, but aggressive Cloudflare restrictions blocked backend requests. The architecture was migrated to `mail.tm`.
-The backend creates a **deterministic password** (a cryptographic-style hash based on the email address). This means our frontend only ever needs to remember the generated "email address", and our backend magically handles account creation, token fetching, and mailbox reading behind the scenes.
+### Why Guerrilla Mail?
+The project was originally built against `1secmail`, then migrated to `mail.tm` after `1secmail` started blocking requests. `mail.tm` then started rejecting requests specifically from Vercel's IP range (confirmed: identical requests succeed from any other IP, fail 100% of the time from the deployed app) — so the architecture moved to `guerrillamail.com`, which has no such block so far.
+
+Guerrilla Mail has no password concept — `/api/generate` starts a session and returns both an `email` and a `token` (Guerrilla's `sid_token`). The frontend stores both and sends the token back on every subsequent `/api/messages` and `/api/message` call to resume that session.
 
 ---
 
@@ -55,7 +56,7 @@ The backend creates a **deterministic password** (a cryptographic-style hash bas
 ├── src/
 │   ├── app/
 │   │   ├── api/
-│   │   │   ├── generate/route.ts  # Creates a new Mail.tm account & email address
+│   │   │   ├── generate/route.ts  # Starts a Guerrilla Mail session & returns email + token
 │   │   │   ├── messages/route.ts  # Fetches the inbox list for the given email
 │   │   │   └── message/route.ts   # Fetches the full contents (HTML/Text) of an email
 │   │   ├── privacy/page.tsx       # Privacy Policy page
