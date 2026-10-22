@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server';
 import { MAIL_API_BASE, mailProxyHeaders } from '@/lib/mailtm';
 
+export const dynamic = 'force-dynamic';
+
 const getPassword = (email: string) => email + "_Secr3t!";
+
+const COMMON_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  'Accept': 'application/json, application/ld+json',
+};
 
 async function fetchWithRetry(url: string, options: RequestInit = {}, retries = 2): Promise<Response> {
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -31,33 +38,39 @@ export async function GET(request: Request) {
     // 1. Get Token
     const tRes = await fetchWithRetry(`${MAIL_API_BASE}/token`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...mailProxyHeaders() },
-      body: JSON.stringify({ address: email, password })
+      headers: { ...COMMON_HEADERS, ...mailProxyHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address: email, password }),
+      cache: 'no-store',
     });
 
     if (!tRes.ok) {
-      const body = await tRes.text().catch(() => '');
-      throw new Error(`Failed to get token: ${tRes.status} ${body}`);
+      const errText = await tRes.text().catch(() => '');
+      console.error(`Mail.tm token error (${tRes.status}):`, errText);
+      throw new Error(`Failed to get token: ${tRes.status} ${errText}`);
     }
     const tData = await tRes.json();
     const token = tData.token;
 
     // 2. Get Messages
     const mRes = await fetchWithRetry(`${MAIL_API_BASE}/messages`, {
-      headers: { 'Authorization': `Bearer ${token}`, ...mailProxyHeaders() }
+      headers: { ...COMMON_HEADERS, ...mailProxyHeaders(), 'Authorization': `Bearer ${token}` },
+      cache: 'no-store',
     });
 
     if (!mRes.ok) {
-      const body = await mRes.text().catch(() => '');
-      throw new Error(`Failed to fetch messages: ${mRes.status} ${body}`);
+      const errText = await mRes.text().catch(() => '');
+      console.error(`Mail.tm messages error (${mRes.status}):`, errText);
+      throw new Error(`Failed to fetch messages: ${mRes.status} ${errText}`);
     }
     const mData = await mRes.json();
-    
-    const messages = mData['hydra:member'].map((m: any) => ({
-        id: m.id,
-        from: m.from.address || m.from.name,
-        subject: m.subject,
-        date: m.createdAt
+
+    const memberList = Array.isArray(mData) ? mData : (mData['hydra:member'] || []);
+
+    const messages = memberList.map((m: any) => ({
+      id: m.id,
+      from: typeof m.from === 'object' ? (m.from.address || m.from.name) : (m.from || ''),
+      subject: m.subject || '',
+      date: m.createdAt
     }));
 
     return NextResponse.json({ messages });
