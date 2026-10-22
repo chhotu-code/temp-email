@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import ThemeToggle from './theme-toggle';
 
 export const metadata: Metadata = {
   title: 'Temp Mail - Disposable Temporary Email Address & Fake Phone Number',
@@ -73,26 +74,48 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <nav className="container">
-          <div className="navbar">
-            <a href="/" className="logo">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/><path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/></svg>
-              Fake<span>Email</span>
-            </a>
-            <div className="nav-links">
-              <a href="#features" className="nav-link">Features</a>
-              <a href="#faq" className="nav-link">FAQ</a>
-              <button className="nav-btn">Premium</button>
+        <header className="site-header">
+          <div className="container">
+            <div className="navbar">
+              <a href="/" className="logo">
+                <div className="logo-icon-wrap">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/><path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/></svg>
+                </div>
+                <div className="logo-text">
+                  Fake<span className="logo-highlight">Email</span>
+                  <span className="logo-version">v2.4</span>
+                </div>
+              </a>
+
+
+              <div className="nav-links">
+                <a href="#features" className="nav-link">Features</a>
+                <a href="#faq" className="nav-link">FAQ</a>
+                <ThemeToggle />
+              </div>
             </div>
           </div>
-        </nav>
+        </header>
+
         {children}
+
         <footer className="footer">
+          <div className="footer-aurora-line"></div>
           <div className="container footer-content">
-            <div className="logo">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/><path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/></svg>
-              Fake<span>Email</span>
+            <div className="footer-brand-col">
+              <div className="logo">
+                <div className="logo-icon-wrap">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/><path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/></svg>
+                </div>
+                <div className="logo-text">
+                  Fake<span className="logo-highlight">Email</span>
+                </div>
+              </div>
+              <p className="footer-tagline">
+                Ephemeral, zero-trace temporary inboxes engineered for autonomous web browsing, privacy defense, and developer test mocking.
+              </p>
             </div>
+
             <div className="footer-links">
               <a href="/privacy" className="footer-link">Privacy Policy</a>
               <a href="/terms" className="footer-link">Terms of Service</a>
@@ -100,10 +123,14 @@ export default function RootLayout({
               <a href="https://github.com/chhotu-code" target="_blank" rel="noopener noreferrer" className="footer-link">GitHub</a>
             </div>
           </div>
+
           <div className="container footer-bottom">
-            <p>&copy; {new Date().getFullYear()} FakeEmail. All rights reserved. Developed by{' '}
-              <a href="https://github.com/chhotu-code" target="_blank" rel="noopener noreferrer">Chhotu Kumar</a>.
-            </p>
+            <div className="footer-bottom-left">
+              <p>&copy; {new Date().getFullYear()} FakeEmail. Military-grade privacy protocol. Developed by{' '}
+                <a href="https://github.com/chhotu-code" target="_blank" rel="noopener noreferrer">Chhotu</a>.
+              </p>
+            </div>
+            
           </div>
         </footer>
       </body>
