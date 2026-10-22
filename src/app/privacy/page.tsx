@@ -29,7 +29,7 @@ export default function PrivacyPolicy() {
         <p>We do not store or backup your temporary inbox data for long-term use.</p>
 
         <h3>4. Third-Party Services</h3>
-        <p>We utilize third-party APIs (such as mail.tm) to facilitate our temporary email services. While we do not share your personal information, your use of our service involves routing data through these secure third-party channels.</p>
+        <p>We utilize third-party APIs (such as Guerrilla Mail) to facilitate our temporary email services. While we do not share your personal information, your use of our service involves routing data through these secure third-party channels.</p>
 
         <h3>5. Cookies</h3>
         <p>We may use minimal local storage (such as HTML5 LocalStorage) strictly to remember your active temporary email address across page reloads. We do not use tracking cookies for advertising.</p>

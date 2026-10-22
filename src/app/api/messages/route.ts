@@ -1,57 +1,33 @@
 import { NextResponse } from 'next/server';
-import { MAIL_API_BASE, MAIL_COMMON_HEADERS, mailProxyHeaders, fetchMailTm } from '@/lib/mailtm';
+import { fetchGuerrilla } from '@/lib/guerrillamail';
 
 export const dynamic = 'force-dynamic';
 
-const getPassword = (email: string) => email + "_Secr3t!";
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const email = searchParams.get('email');
+  const token = searchParams.get('token');
 
-  if (!email) {
-    return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+  if (!token) {
+    return NextResponse.json({ error: 'Token is required' }, { status: 400 });
   }
 
-  const password = getPassword(email);
-
   try {
-    // 1. Get Token
-    const tRes = await fetchMailTm(`${MAIL_API_BASE}/token`, {
-      method: 'POST',
-      headers: { ...MAIL_COMMON_HEADERS, ...mailProxyHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ address: email, password }),
-      cache: 'no-store',
-    });
-
-    if (!tRes.ok) {
-      const errText = await tRes.text().catch(() => '');
-      console.error(`Mail.tm token error (${tRes.status}):`, errText);
-      throw new Error(`Failed to get token: ${tRes.status} ${errText}`);
+    // get_email_list returns the persistent inbox state; check_email instead
+    // behaves like a draining notification queue (returns each message only
+    // once per session, even with seq=0), which made messages vanish after
+    // the first refresh.
+    const res = await fetchGuerrilla({ f: 'get_email_list', offset: '0', sid_token: token });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      throw new Error(`Failed to fetch messages: ${res.status} ${errText}`);
     }
-    const tData = await tRes.json();
-    const token = tData.token;
+    const data = await res.json();
 
-    // 2. Get Messages
-    const mRes = await fetchMailTm(`${MAIL_API_BASE}/messages`, {
-      headers: { ...MAIL_COMMON_HEADERS, ...mailProxyHeaders(), 'Authorization': `Bearer ${token}` },
-      cache: 'no-store',
-    });
-
-    if (!mRes.ok) {
-      const errText = await mRes.text().catch(() => '');
-      console.error(`Mail.tm messages error (${mRes.status}):`, errText);
-      throw new Error(`Failed to fetch messages: ${mRes.status} ${errText}`);
-    }
-    const mData = await mRes.json();
-
-    const memberList = Array.isArray(mData) ? mData : (mData['hydra:member'] || []);
-
-    const messages = memberList.map((m: any) => ({
-      id: m.id,
-      from: typeof m.from === 'object' ? (m.from.address || m.from.name) : (m.from || ''),
-      subject: m.subject || '',
-      date: m.createdAt
+    const messages = (data.list || []).map((m: any) => ({
+      id: m.mail_id,
+      from: m.mail_from,
+      subject: m.mail_subject,
+      date: m.mail_timestamp ? new Date(m.mail_timestamp * 1000).toISOString() : m.mail_date,
     }));
 
     return NextResponse.json({ messages });
