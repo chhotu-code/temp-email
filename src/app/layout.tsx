@@ -97,7 +97,13 @@ export default function RootLayout({
               <a href="/privacy" className="footer-link">Privacy Policy</a>
               <a href="/terms" className="footer-link">Terms of Service</a>
               <a href="https://in.linkedin.com/in/chhotu" target="_blank" rel="noopener noreferrer" className="footer-link">Contacts</a>
+              <a href="https://github.com/chhotu-code" target="_blank" rel="noopener noreferrer" className="footer-link">GitHub</a>
             </div>
+          </div>
+          <div className="container footer-bottom">
+            <p>&copy; {new Date().getFullYear()} FakeEmail. All rights reserved. Developed by{' '}
+              <a href="https://github.com/chhotu-code" target="_blank" rel="noopener noreferrer">Chhotu Kumar</a>.
+            </p>
           </div>
         </footer>
       </body>

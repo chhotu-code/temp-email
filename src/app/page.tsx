@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Copy, RefreshCw, Trash2, QrCode, Mail, ChevronLeft, Inbox, Shield, Clock, Smartphone, Edit2, Phone } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Copy, RefreshCw, Trash2, QrCode, Mail, ChevronLeft, Inbox, Shield, Clock, Smartphone, Edit2, Phone, X } from 'lucide-react';
 
 interface Message {
   id: number;
@@ -36,30 +36,54 @@ export default function Home() {
   const [phone, setPhone] = useState<string | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
 
+  const toastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const showToast = (msg: string) => {
+    if (toastTimeout.current) clearTimeout(toastTimeout.current);
     setToast(msg);
-    setTimeout(() => setToast(null), 3000);
+    toastTimeout.current = setTimeout(() => setToast(null), 3000);
   };
+
+  const dismissToast = () => {
+    if (toastTimeout.current) clearTimeout(toastTimeout.current);
+    setToast(null);
+  };
+
+  const retriesLeft = useRef(2);
 
   const generateEmail = useCallback(async () => {
     setLoadingEmail(true);
     try {
       const res = await fetch('/api/generate');
       const data = await res.json();
-      if (data.email) {
-        setEmail(data.email);
-        localStorage.setItem('tempMailAddress', data.email);
-        setMessages([]);
-        setViewMessage(null);
+      if (!res.ok || !data.email) {
+        throw new Error(data.error || 'Failed to generate email');
       }
+      retriesLeft.current = 2;
+      dismissToast();
+      setEmail(data.email);
+      localStorage.setItem('tempMailAddress', data.email);
+      setMessages([]);
+      setViewMessage(null);
     } catch (err) {
-      showToast('Failed to generate email');
+      if (retriesLeft.current > 0) {
+        retriesLeft.current -= 1;
+        showToast('Failed to generate email. Retrying...');
+        setTimeout(generateEmail, 2000);
+      } else {
+        showToast('Failed to generate email. Please try again.');
+      }
     } finally {
       setLoadingEmail(false);
     }
   }, []);
 
+  const didInit = useRef(false);
+
   useEffect(() => {
+    if (didInit.current) return;
+    didInit.current = true;
+
     const savedEmail = localStorage.getItem('tempMailAddress');
     if (savedEmail) {
       setEmail(savedEmail);
@@ -150,9 +174,11 @@ export default function Home() {
       {showQR && (
         <div className="qr-modal" onClick={() => setShowQR(false)}>
           <div className="qr-content" onClick={e => e.stopPropagation()}>
+            <button className="qr-close" onClick={() => setShowQR(false)} aria-label="Close">
+              <X size={18} />
+            </button>
             <h3>Scan QR Code</h3>
             {email && <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=mailto:${email}`} alt="QR Code" />}
-            <button className="qr-close" onClick={() => setShowQR(false)}>Close</button>
           </div>
         </div>
       )}
@@ -182,11 +208,11 @@ export default function Home() {
             <input 
               type="text" 
               className="email-input" 
-              value={activeTab === 'email' ? (email || 'Loading...') : (phone || 'Generating...')} 
+              value={activeTab === 'email' ? (email || (loadingEmail ? 'Loading...' : 'Failed to generate email')) : (phone || 'Generating...')}
               readOnly 
             />
             {activeTab === 'email' && (
-              <button className="qr-btn" onClick={() => setShowQR(true)} title="QR Code">
+              <button className="qr-btn" onClick={() => setShowQR(true)} title="QR Code" disabled={!email}>
                 <QrCode size={24} />
               </button>
             )}

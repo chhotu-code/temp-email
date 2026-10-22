@@ -638,6 +638,25 @@ button {
   color: var(--accent);
 }
 
+.footer-bottom {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--glass-border);
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.footer-bottom a {
+  color: var(--text-secondary);
+  text-decoration: underline;
+  transition: var(--transition);
+}
+
+.footer-bottom a:hover {
+  color: var(--accent);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .hero h1 { font-size: 2rem; }
@@ -690,6 +709,7 @@ button {
 }
 
 .qr-content {
+  position: relative;
   background: white;
   padding: 2rem;
   border-radius: var(--radius-lg);
@@ -700,10 +720,17 @@ button {
   margin-bottom: 1rem;
 }
 .qr-close {
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
   background: #f1f5f9;
-  border-radius: var(--radius-md);
+  border-radius: 50%;
   color: #0f172a;
 }
 .qr-close:hover {
