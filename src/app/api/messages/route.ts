@@ -12,7 +12,11 @@ export async function GET(request: Request) {
   }
 
   try {
-    const res = await fetchGuerrilla({ f: 'check_email', seq: '0', sid_token: token });
+    // get_email_list returns the persistent inbox state; check_email instead
+    // behaves like a draining notification queue (returns each message only
+    // once per session, even with seq=0), which made messages vanish after
+    // the first refresh.
+    const res = await fetchGuerrilla({ f: 'get_email_list', offset: '0', sid_token: token });
     if (!res.ok) {
       const errText = await res.text().catch(() => '');
       throw new Error(`Failed to fetch messages: ${res.status} ${errText}`);
