@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Sun, Moon, Zap } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 
 export default function ThemeToggle() {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
@@ -40,15 +40,9 @@ export default function ThemeToggle() {
       <span className="nav-btn-neon-glow"></span>
       <span className="nav-btn-text">
         {mounted && theme === 'light' ? (
-          <>
-            <Moon size={14} style={{ display: 'inline', marginRight: '6px', verticalAlign: '-2px' }} />
-            Dark Cloak
-          </>
+          <Moon size={16} style={{ display: 'inline', verticalAlign: '-3px' }} />
         ) : (
-          <>
-            <Zap size={14} style={{ display: 'inline', marginRight: '6px', verticalAlign: '-2px' }} />
-            Pro Cloak
-          </>
+          <Sun size={16} style={{ display: 'inline', verticalAlign: '-3px' }} />
         )}
       </span>
     </button>
