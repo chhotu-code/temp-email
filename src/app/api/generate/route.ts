@@ -1,52 +1,30 @@
 import { NextResponse } from 'next/server';
-import { MAIL_API_BASE, MAIL_COMMON_HEADERS, mailProxyHeaders, fetchMailTm } from '@/lib/mailtm';
+import { fetchGuerrilla } from '@/lib/guerrillamail';
 
 export const dynamic = 'force-dynamic';
 
-const getPassword = (email: string) => email + "_Secr3t!";
-
 export async function GET() {
   try {
-    // 1. Get domain
-    const dRes = await fetchMailTm(`${MAIL_API_BASE}/domains`, {
-      headers: { ...MAIL_COMMON_HEADERS, ...mailProxyHeaders() },
-      next: { revalidate: 300 },
-    });
-
-    if (!dRes.ok) {
-      const errText = await dRes.text().catch(() => '');
-      console.error(`Mail.tm domains error (${dRes.status}):`, errText);
-      throw new Error(`Failed to fetch domains: ${dRes.status} ${errText}`);
+    // 1. Start a session and get a randomly-assigned address + session token
+    const addrRes = await fetchGuerrilla({ f: 'get_email_address' });
+    if (!addrRes.ok) {
+      const errText = await addrRes.text().catch(() => '');
+      throw new Error(`Failed to get email address: ${addrRes.status} ${errText}`);
     }
+    const addrData = await addrRes.json();
+    const sidToken = addrData.sid_token;
 
-    const dData = await dRes.json();
-    const domainList = Array.isArray(dData) ? dData : (dData['hydra:member'] || []);
-
-    if (!domainList || domainList.length === 0) {
-      throw new Error('No available domains found from mail.tm');
-    }
-
-    const domain = domainList[0].domain;
-
-    // 2. Generate email
+    // 2. Give it a random login name instead of the auto-assigned one,
+    // keeping the same session token.
     const prefix = Math.random().toString(36).substring(2, 12);
-    const address = `${prefix}@${domain}`;
-    const password = getPassword(address);
-
-    // 3. Create account
-    const cRes = await fetchMailTm(`${MAIL_API_BASE}/accounts`, {
-      method: 'POST',
-      headers: { ...MAIL_COMMON_HEADERS, ...mailProxyHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ address, password }),
-    });
-
-    if (!cRes.ok) {
-      const errText = await cRes.text().catch(() => '');
-      console.error(`Mail.tm create account error (${cRes.status}):`, errText);
-      throw new Error(`Failed to create account: ${cRes.status} ${errText}`);
+    const userRes = await fetchGuerrilla({ f: 'set_email_user', email_user: prefix, sid_token: sidToken });
+    if (!userRes.ok) {
+      const errText = await userRes.text().catch(() => '');
+      throw new Error(`Failed to set email address: ${userRes.status} ${errText}`);
     }
+    const userData = await userRes.json();
 
-    return NextResponse.json({ email: address });
+    return NextResponse.json({ email: userData.email_addr, token: userData.sid_token });
   } catch (error: any) {
     console.error('Error generating email:', error);
     return NextResponse.json({ error: error.message || 'Failed to generate email' }, { status: 500 });
