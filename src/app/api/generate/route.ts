@@ -1,35 +1,15 @@
 import { NextResponse } from 'next/server';
-import { MAIL_API_BASE, mailProxyHeaders } from '@/lib/mailtm';
+import { MAIL_API_BASE, MAIL_COMMON_HEADERS, mailProxyHeaders, fetchMailTm } from '@/lib/mailtm';
 
 export const dynamic = 'force-dynamic';
 
 const getPassword = (email: string) => email + "_Secr3t!";
 
-const COMMON_HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-  'Accept': 'application/json, application/ld+json',
-};
-
-async function fetchWithRetry(url: string, options: RequestInit = {}, retries = 2): Promise<Response> {
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    const res = await fetch(url, options);
-    if (res.status !== 429 || attempt === retries) return res;
-
-    const retryAfter = Number(res.headers.get('retry-after'));
-    const delayMs = Number.isFinite(retryAfter) && retryAfter > 0
-      ? Math.min(retryAfter * 1000, 2000)
-      : 300 * 2 ** attempt;
-    await new Promise((resolve) => setTimeout(resolve, delayMs));
-  }
-  // Unreachable, but keeps TypeScript happy
-  return fetch(url, options);
-}
-
 export async function GET() {
   try {
     // 1. Get domain
-    const dRes = await fetchWithRetry(`${MAIL_API_BASE}/domains`, {
-      headers: { ...COMMON_HEADERS, ...mailProxyHeaders() },
+    const dRes = await fetchMailTm(`${MAIL_API_BASE}/domains`, {
+      headers: { ...MAIL_COMMON_HEADERS, ...mailProxyHeaders() },
       next: { revalidate: 300 },
     });
 
@@ -54,9 +34,9 @@ export async function GET() {
     const password = getPassword(address);
 
     // 3. Create account
-    const cRes = await fetchWithRetry(`${MAIL_API_BASE}/accounts`, {
+    const cRes = await fetchMailTm(`${MAIL_API_BASE}/accounts`, {
       method: 'POST',
-      headers: { ...COMMON_HEADERS, ...mailProxyHeaders(), 'Content-Type': 'application/json' },
+      headers: { ...MAIL_COMMON_HEADERS, ...mailProxyHeaders(), 'Content-Type': 'application/json' },
       body: JSON.stringify({ address, password }),
     });
 
