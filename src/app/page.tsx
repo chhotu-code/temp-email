@@ -467,7 +467,7 @@ export default function Home() {
           <Shield size={14} /> ARCHITECTURAL PRIVACY
         </div>
         <h2 className="section-heading">
-          Why <span className="aurora-gradient-text">FakeEmail</span> is your ultimate digital cloaking tool
+          Why <span className="aurora-gradient-text">GhostInbox</span> is your ultimate digital cloaking tool
         </h2>
         <p className="section-sub">
           Engineered from first principles for zero tracking, instant ephemeral existence, and resilient data hygiene.
@@ -485,13 +485,13 @@ export default function Home() {
               theme: 'theme-cyan', 
               icon: <Zap size={22} />, 
               title: 'Sub-Second Activation', 
-              desc: 'No registration forms, no phone numbers, no captcha delays. Open FakeEmail and your disposable inbox is already live — copy and deploy anywhere online immediately.' 
+              desc: 'No registration forms, no phone numbers, no captcha delays. Open GhostInbox and your disposable inbox is already live — copy and deploy anywhere online immediately.' 
             },
             { 
               theme: 'theme-purple', 
               icon: <Smartphone size={22} />, 
               title: 'Universal Device Adaptation', 
-              desc: "Whether on your phone during a commute or on high-resolution multi-monitor desktop setups, FakeEmail's cyber glass layout adapts fluidly with crisp accessibility." 
+              desc: "Whether on your phone during a commute or on high-resolution multi-monitor desktop setups, GhostInbox's cyber glass layout adapts fluidly with crisp accessibility." 
             },
             { 
               theme: 'theme-pink', 
@@ -528,7 +528,7 @@ export default function Home() {
           <Globe size={14} /> THREE-PHASE PIPELINE
         </div>
         <h2 className="section-heading">
-          How <span className="aurora-gradient-text">FakeEmail</span> operates
+          How <span className="aurora-gradient-text">GhostInbox</span> operates
         </h2>
         <p className="section-sub">
           A seamless three-step protocol that shields your primary email from spam, phishing, and database leaks.
@@ -540,7 +540,7 @@ export default function Home() {
               n: '01', 
               theme: 'step-cyan',
               title: 'Acquire Instant Identity', 
-              desc: "When you land on FakeEmail, a unique disposable email address is synthesized for you immediately. Click 'Copy Address' and you are equipped to navigate the web safely." 
+              desc: "When you land on GhostInbox, a unique disposable email address is synthesized for you immediately. Click 'Copy Address' and you are equipped to navigate the web safely." 
             },
             { 
               n: '02', 
@@ -594,8 +594,8 @@ export default function Home() {
         <div className="faq-list">
           {([
             { 
-              q: 'Is FakeEmail completely free to use?', 
-              a: 'Yes — 100% free and uncapped. FakeEmail is built as an open utility without paywalls, credit card requirements, or forced subscriptions. Open the site and use your inbox freely as often as you want.' 
+              q: 'Is GhostInbox completely free to use?', 
+              a: 'Yes — 100% free and uncapped. GhostInbox is built as an open utility without paywalls, credit card requirements, or forced subscriptions. Open the site and use your inbox freely as often as you want.' 
             },
             { 
               q: 'How long does my temporary address remain active?', 
@@ -603,19 +603,19 @@ export default function Home() {
             },
             { 
               q: 'Can I receive all email formats, HTML, and verification links?', 
-              a: 'Yes. FakeEmail connects directly to actual email servers and renders incoming messages with HTML markup, images, formatted text, and clickable verification buttons so sign-ups work cleanly.' 
+              a: 'Yes. GhostInbox connects directly to actual email servers and renders incoming messages with HTML markup, images, formatted text, and clickable verification buttons so sign-ups work cleanly.' 
             },
             { 
               q: 'Is my temporary inbox visible to other users?', 
               a: 'No. Every email generated has a distinct random cryptographic alias and authentication token tied exclusively to your session. Others cannot browse or intercept your incoming mail.' 
             },
             { 
-              q: 'Can I use FakeEmail to receive SMS text messages or calls?', 
+              q: 'Can I use GhostInbox to receive SMS text messages or calls?', 
               a: "The 'Fake Phone Number' utility generates formatting-compliant dummy numbers intended for UI mocking, QA testing, and layout placeholders. It is not connected to a telecom gateway and cannot receive incoming SMS or phone calls." 
             },
             { 
               q: 'Do you log, analyze, or sell personal data or messages?', 
-              a: 'No. FakeEmail maintains zero tracking telemetry, does not sell data to advertisers, and does not retain emails once dismissed. Messages are pulled directly into your client session as an ephemeral pass-through viewer.' 
+              a: 'No. GhostInbox maintains zero tracking telemetry, does not sell data to advertisers, and does not retain emails once dismissed. Messages are pulled directly into your client session as an ephemeral pass-through viewer.' 
             },
           ]).map((item, i) => (
             <div
@@ -653,7 +653,7 @@ export default function Home() {
             Every time you submit your real primary email into an online form, you enter an asymmetrical contract: you hand over a permanent, cross-platform identifier in exchange for a one-time piece of content, software trial, or account gate. In 2026, data aggregation networks map this single identifier across hundreds of independent databases.
           </p>
           <p>
-            FakeEmail reverses this vulnerability by decoupling your authentic digital identity from disposable web interactions, turning untrusted services into zero-risk dead ends.
+            GhostInbox reverses this vulnerability by decoupling your authentic digital identity from disposable web interactions, turning untrusted services into zero-risk dead ends.
           </p>
 
           <div className="article-pullquote">
@@ -668,7 +668,7 @@ export default function Home() {
             Data brokers, lead-generation aggregators, and advertising conglomerates ingest corporate acquisition lists and breach dumps continuously. When a startup you tested years ago pivots, merges, or suffers a security incident, your email address is seldom purged — it enters resale circulation. A single exposed inbox address can trigger dozens of automated drip spam campaigns and phishing exploits.
           </p>
           <p>
-            By adopting FakeEmail for transient interactions, that cycle is shattered. If a downstream service leaks their records, the compromised entry leads to an ephemeral, discarded node with zero correlation to your personal or professional communications.
+            By adopting GhostInbox for transient interactions, that cycle is shattered. If a downstream service leaks their records, the compromised entry leads to an ephemeral, discarded node with zero correlation to your personal or professional communications.
           </p>
 
           <h3>Key operational use cases</h3>
@@ -690,9 +690,9 @@ export default function Home() {
             </li>
           </ul>
 
-          <h3>Core engineering principles of FakeEmail</h3>
+          <h3>Core engineering principles of GhostInbox</h3>
           <p>
-            Many legacy disposable email utilities are throttled by hostile pop-ups, broken HTML parsing, or sluggish polling. FakeEmail was engineered under strict foundational criteria:
+            Many legacy disposable email utilities are throttled by hostile pop-ups, broken HTML parsing, or sluggish polling. GhostInbox was engineered under strict foundational criteria:
           </p>
           <ul className="article-key-points">
             <li>

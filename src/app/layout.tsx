@@ -126,7 +126,7 @@ export default function RootLayout({
 
           <div className="container footer-bottom">
             <div className="footer-bottom-left">
-              <p>&copy; {new Date().getFullYear()} FakeEmail. Military-grade privacy protocol. Developed by{' '}
+              <p>&copy; {new Date().getFullYear()} GhostInbox. Military-grade privacy protocol. Developed by{' '}
                 <a href="https://github.com/chhotu-code" target="_blank" rel="noopener noreferrer">Chhotu</a>.
               </p>
             </div>
