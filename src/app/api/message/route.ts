@@ -4,7 +4,7 @@ import { fetchGuerrilla } from '@/lib/guerrillamail';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
-  const { searchParams } = new (request.url);
+  const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
   const id = searchParams.get('id');
 
