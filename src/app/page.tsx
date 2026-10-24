@@ -301,16 +301,14 @@ export default function Home() {
               <span>{copied ? 'Copied to Clipboard!' : 'Copy Address'}</span>
             </button>
 
-            {activeTab === 'email' && (
-              <button 
-                className="action-btn btn-refresh" 
-                onClick={() => fetchMessages(false)}
-                title="Refresh inbox"
-              >
-                <RefreshCw size={18} className={loadingMessages ? 'animate-spin' : ''} />
-                <span>Refresh Inbox</span>
-              </button>
-            )}
+            <button
+              className="action-btn btn-refresh"
+              onClick={() => activeTab === 'email' ? fetchMessages(false) : showToast('No new messages — this number does not receive real SMS')}
+              title="Refresh inbox"
+            >
+              <RefreshCw size={18} className={loadingMessages ? 'animate-spin' : ''} />
+              <span>Refresh Inbox</span>
+            </button>
 
             <button 
               className="action-btn btn-change" 
